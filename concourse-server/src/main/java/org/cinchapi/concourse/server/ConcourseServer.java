@@ -78,14 +78,10 @@ import org.cinchapi.concourse.shell.CommandLine;
 import org.cinchapi.concourse.thrift.AccessToken;
 import org.cinchapi.concourse.thrift.ConcourseService;
 import org.cinchapi.concourse.thrift.TCriteria;
-import org.cinchapi.concourse.thrift.TDuplicateEntryException;
 import org.cinchapi.concourse.thrift.TObject;
 import org.cinchapi.concourse.thrift.ConcourseService.Iface;
 import org.cinchapi.concourse.thrift.Operator;
-import org.cinchapi.concourse.thrift.TParseException;
-import org.cinchapi.concourse.thrift.TSecurityException;
 import org.cinchapi.concourse.thrift.TSymbol;
-import org.cinchapi.concourse.thrift.TTransactionException;
 import org.cinchapi.concourse.thrift.TransactionToken;
 import org.cinchapi.concourse.time.Time;
 import org.cinchapi.concourse.util.Convert;
@@ -98,8 +94,12 @@ import org.cinchapi.concourse.util.TSets;
 import org.cinchapi.concourse.util.Timestamps;
 import org.cinchapi.concourse.util.Version;
 import org.cinchapi.concourse.Constants;
+import org.cinchapi.concourse.DuplicateEntryException;
 import org.cinchapi.concourse.Link;
+import org.cinchapi.concourse.ParseException;
 import org.cinchapi.concourse.Timestamp;
+import org.cinchapi.concourse.SecurityException;
+import org.cinchapi.concourse.TransactionException;
 import org.cinchapi.concourse.thrift.Type;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
@@ -719,7 +719,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return record;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -739,7 +739,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -768,7 +768,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -782,7 +782,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).audit(key, record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -791,8 +791,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @VersionControl
     public Map<Long, String> auditKeyRecordStart(String key, long record,
             long start, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         return auditKeyRecordStartEnd(key, record, start, Time.NONE, creds,
                 transaction, environment);
     }
@@ -820,7 +820,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -853,7 +853,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).audit(record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -871,8 +871,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @VersionControl
     public Map<Long, String> auditRecordStartEnd(long record, long start,
             long end, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -891,7 +891,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -922,7 +922,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).browse(key);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -952,7 +952,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -973,7 +973,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -996,7 +996,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).browse(key, timestamp);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1033,7 +1033,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1070,7 +1070,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1116,7 +1116,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1144,7 +1144,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1172,7 +1172,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1202,7 +1202,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1226,7 +1226,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1253,7 +1253,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1265,7 +1265,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return transactions.remove(transaction).commit();
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1277,7 +1277,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).describe(record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1306,7 +1306,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1315,8 +1315,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @HistoricalRead
     public Map<Long, Set<String>> describeRecordsTime(List<Long> records,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -1327,7 +1327,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1351,7 +1351,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     timestamp);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1368,8 +1368,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Override
     public Map<Diff, Set<TObject>> diffKeyRecordStart(String key, long record,
             long start, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         return diffKeyRecordStartEnd(key, record, start, Timestamp.now()
                 .getMicros(), creds, transaction, environment);
     }
@@ -1416,7 +1416,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1518,7 +1518,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1526,8 +1526,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Alias
     public Map<TObject, Map<Diff, Set<Long>>> diffKeyStartstr(String key,
             String start, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         return diffKeyStart(key, NaturalLanguage.parseMicros(start), creds,
                 transaction, environment);
     }
@@ -1619,7 +1619,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1675,10 +1675,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return Sets.newTreeSet(stack.pop());
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -1705,7 +1705,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return Sets.newTreeSet(stack.pop());
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1750,7 +1750,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     tValues);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1766,7 +1766,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     operator, tValues);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1810,14 +1810,14 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                 return Iterables.getOnlyElement(records);
             }
             else {
-                throw new TDuplicateEntryException(
+                throw new DuplicateEntryException(
                         org.cinchapi.concourse.util.Strings.joinWithSpace(
                                 "Found", records.size(), "records that match",
                                 key, "=", value));
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1850,14 +1850,14 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                 return Iterables.getOnlyElement(records);
             }
             else {
-                throw new TDuplicateEntryException(
+                throw new DuplicateEntryException(
                         org.cinchapi.concourse.util.Strings.joinWithSpace(
                                 "Found", records.size(), "records that match",
                                 ccl));
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1890,14 +1890,14 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                 return Iterables.getOnlyElement(records);
             }
             else {
-                throw new TDuplicateEntryException(
+                throw new DuplicateEntryException(
                         org.cinchapi.concourse.util.Strings.joinWithSpace(
                                 "Found", records.size(), "records that match",
                                 Language.translateFromThriftCriteria(criteria)));
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -1941,10 +1941,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -1988,10 +1988,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -2044,7 +2044,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2088,7 +2088,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2148,10 +2148,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -2189,10 +2189,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -2200,8 +2200,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Alias
     public Map<Long, TObject> getKeyCclTimestr(String key, String ccl,
             String timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TParseException, TException {
+            String environment) throws SecurityException, TransactionException,
+            ParseException, TException {
         return getKeyCclTime(key, ccl, NaturalLanguage.parseMicros(timestamp),
                 creds, transaction, environment);
     }
@@ -2240,7 +2240,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2278,7 +2278,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2302,7 +2302,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     TObject.NULL);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2337,7 +2337,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2346,8 +2346,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @HistoricalRead
     public Map<Long, TObject> getKeyRecordsTime(String key, List<Long> records,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Map<Long, TObject> result = Maps.newLinkedHashMap();
@@ -2364,7 +2364,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2390,7 +2390,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                             timestamp), TObject.NULL);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2444,10 +2444,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -2491,10 +2491,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -2548,7 +2548,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2593,7 +2593,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2639,7 +2639,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2680,7 +2680,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2713,7 +2713,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2750,7 +2750,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2766,8 +2766,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
 
     @Override
     public String getServerEnvironment(AccessToken creds,
-            TransactionToken transaction, String env)
-            throws TSecurityException, TException {
+            TransactionToken transaction, String env) throws SecurityException,
+            TException {
         checkAccess(creds, transaction);
         return Environments.sanitize(env);
     }
@@ -2839,7 +2839,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return records;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2859,7 +2859,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     && atomic.commit();
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (AtomicStateException e) {
             return false;
@@ -2895,7 +2895,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2907,7 +2907,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getEngine(environment).browse();
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2934,7 +2934,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return json;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2949,7 +2949,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     getStore(transaction, environment));
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -2994,7 +2994,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                 return false;
             }
         }
-        catch (TSecurityException e) {
+        catch (SecurityException e) {
             return false;
         }
         catch (TException e) {
@@ -3024,7 +3024,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return doPing(record, getStore(transaction, environment));
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3053,7 +3053,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3073,7 +3073,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3102,7 +3102,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3113,8 +3113,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @AutoRetry
     public void revertKeyRecordsTime(String key, List<Long> records,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -3132,7 +3132,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
 
     }
@@ -3169,7 +3169,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3190,8 +3190,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @AutoRetry
     public void revertKeysRecordsTime(List<String> keys, List<Long> records,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -3211,7 +3211,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3232,8 +3232,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @AutoRetry
     public void revertKeysRecordTime(List<String> keys, long record,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -3251,7 +3251,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3280,7 +3280,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, env).search(key, query);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3317,10 +3317,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3358,10 +3358,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3407,7 +3407,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3445,7 +3445,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3487,10 +3487,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3523,10 +3523,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3534,8 +3534,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Alias
     public Map<Long, Set<TObject>> selectKeyCclTimestr(String key, String ccl,
             String timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TParseException, TException {
+            String environment) throws SecurityException, TransactionException,
+            ParseException, TException {
         return selectKeyCclTime(key, ccl,
                 NaturalLanguage.parseMicros(timestamp), creds, transaction,
                 environment);
@@ -3569,7 +3569,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3602,7 +3602,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3625,7 +3625,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).select(key, record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3654,7 +3654,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3675,7 +3675,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3693,15 +3693,15 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @HistoricalRead
     public Set<TObject> selectKeyRecordTime(String key, long record,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             return getStore(transaction, environment).select(key, record,
                     timestamp);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3748,10 +3748,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3789,10 +3789,10 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -3839,7 +3839,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3878,7 +3878,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3898,8 +3898,8 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Batch
     public Map<String, Set<TObject>> selectKeysRecord(List<String> keys,
             long record, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             Compoundable store = getStore(transaction, environment);
@@ -3919,7 +3919,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3955,7 +3955,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -3983,7 +3983,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4014,7 +4014,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4037,7 +4037,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return getStore(transaction, environment).select(record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4067,7 +4067,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4088,7 +4088,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return result;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4106,14 +4106,14 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @HistoricalRead
     public Map<String, Set<TObject>> selectRecordTime(long record,
             long timestamp, AccessToken creds, TransactionToken transaction,
-            String environment) throws TSecurityException,
-            TTransactionException, TException {
+            String environment) throws SecurityException, TransactionException,
+            TException {
         checkAccess(creds, transaction);
         try {
             return getStore(transaction, environment).select(record, timestamp);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4143,7 +4143,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     value, record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
 
     }
@@ -4171,7 +4171,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4227,7 +4227,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             return NaturalLanguage.parseMicros(phrase);
         }
         catch (Exception e) {
-            throw new TParseException(e.getMessage());
+            throw new ParseException(e.getMessage());
         }
     }
 
@@ -4245,7 +4245,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     : false;
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
         catch (AtomicStateException e) {
             return false;
@@ -4262,7 +4262,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     .verify(key, value, record);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4277,7 +4277,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
                     record, timestamp);
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4320,7 +4320,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
             }
         }
         catch (TransactionStateException e) {
-            throw new TTransactionException();
+            throw new TransactionException();
         }
     }
 
@@ -4330,14 +4330,14 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
      * 
      * @param creds
      * @param transaction
-     * @throws TSecurityException
+     * @throws SecurityException
      * @throws IllegalArgumentException
      */
     private void checkAccess(AccessToken creds,
-            @Nullable TransactionToken transaction) throws TSecurityException,
+            @Nullable TransactionToken transaction) throws SecurityException,
             IllegalArgumentException {
         if(!accessManager.isValidAccessToken(creds)) {
-            throw new TSecurityException("Invalid access token");
+            throw new SecurityException("Invalid access token");
         }
         Preconditions.checkArgument((transaction != null
                 && transaction.getAccessToken().equals(creds) && transactions
@@ -4417,16 +4417,16 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
 
     /**
      * Validate that the {@code username} and {@code password} pair represent
-     * correct credentials. If not, throw a TSecurityException.
+     * correct credentials. If not, throw a SecurityException.
      * 
      * @param username
      * @param password
-     * @throws TSecurityException
+     * @throws SecurityException
      */
     private void validate(ByteBuffer username, ByteBuffer password)
-            throws TSecurityException {
+            throws SecurityException {
         if(!accessManager.isExistingUsernamePasswordCombo(username, password)) {
-            throw new TSecurityException(
+            throw new SecurityException(
                     "Invalid username/password combination.");
         }
     }

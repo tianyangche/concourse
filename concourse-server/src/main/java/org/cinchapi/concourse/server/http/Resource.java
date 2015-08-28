@@ -18,8 +18,8 @@ package org.cinchapi.concourse.server.http;
 import org.cinchapi.concourse.server.GlobalState;
 import org.cinchapi.concourse.server.http.errors.HttpError;
 import org.cinchapi.concourse.thrift.AccessToken;
-import org.cinchapi.concourse.thrift.TSecurityException;
 import org.cinchapi.concourse.thrift.TransactionToken;
+import org.cinchapi.concourse.SecurityException;
 import org.cinchapi.concourse.util.Logger;
 
 import spark.HaltException;
@@ -57,7 +57,7 @@ public abstract class Resource extends Endpoint {
             if(e instanceof HttpError) {
                 response.status(((HttpError) e).getCode());
             }
-            else if(e instanceof TSecurityException
+            else if(e instanceof SecurityException
                     || e instanceof SecurityException) {
                 response.removeCookie(GlobalState.HTTP_AUTH_TOKEN_COOKIE);
                 response.status(401);

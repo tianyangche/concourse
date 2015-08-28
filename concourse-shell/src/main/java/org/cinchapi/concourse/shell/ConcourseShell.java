@@ -44,6 +44,8 @@ import jline.console.completer.StringsCompleter;
 import jline.console.history.FileHistory;
 
 import org.apache.thrift.transport.TTransportException;
+import org.cinchapi.concourse.ParseException;
+import org.cinchapi.concourse.SecurityException;
 import org.cinchapi.concourse.Tag;
 import org.cinchapi.concourse.Concourse;
 import org.cinchapi.concourse.Timestamp;
@@ -51,8 +53,6 @@ import org.cinchapi.concourse.config.ConcourseClientPreferences;
 import org.cinchapi.concourse.lang.Criteria;
 import org.cinchapi.concourse.lang.StartState;
 import org.cinchapi.concourse.thrift.Operator;
-import org.cinchapi.concourse.thrift.TParseException;
-import org.cinchapi.concourse.thrift.TSecurityException;
 import org.cinchapi.concourse.util.FileOps;
 import org.cinchapi.concourse.util.Version;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -112,7 +112,7 @@ public final class ConcourseShell {
                     die("Unable to connect to the Concourse Server at "
                             + opts.host + ":" + opts.port);
                 }
-                else if(e.getCause() instanceof TSecurityException) {
+                else if(e.getCause() instanceof SecurityException) {
                     die("Invalid username/password combination.");
                 }
                 else {
@@ -571,7 +571,7 @@ public final class ConcourseShell {
                 if(e.getCause() instanceof TTransportException) {
                     throw new ProgramCrash(e.getMessage());
                 }
-                else if(e.getCause() instanceof TSecurityException) {
+                else if(e.getCause() instanceof SecurityException) {
                     throw new ProgramCrash(
                             "A security change has occurred and your "
                                     + "session cannot continue");
@@ -589,7 +589,7 @@ public final class ConcourseShell {
                     return evaluate(input);
                 }
                 else {
-                    String message = e.getCause() instanceof TParseException ? e
+                    String message = e.getCause() instanceof ParseException ? e
                             .getCause().getMessage() : e.getMessage();
                     throw new EvaluationException("ERROR: " + message);
                 }
