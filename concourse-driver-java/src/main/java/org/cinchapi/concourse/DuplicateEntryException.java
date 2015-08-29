@@ -16,7 +16,9 @@
 package org.cinchapi.concourse;
 
 /**
- * 
+ * Signals that an attempt to conditionally add or insert data based on a
+ * condition that should be unique, cannot happen because the condition is not
+ * unique.
  * 
  * @author Jeff Nelson
  */

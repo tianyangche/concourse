@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2013-2015 Cinchapi Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,21 +16,24 @@
 package org.cinchapi.concourse;
 
 import org.apache.thrift.TException;
+import org.cinchapi.concourse.annotate.PackagePrivate;
 
 /**
- * 
+ * An unchecked exception that wraps a checked {@link TException}.
  * 
  * @author Jeff Nelson
  */
-public abstract class TRuntimeException extends RuntimeException {
+@PackagePrivate
+abstract class TRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Construct a new instance.
+     * 
      * @param ex
      */
-    protected TRuntimeException(TException ex){
+    protected TRuntimeException(TException ex) {
         super(ex.getMessage());
     }
 
