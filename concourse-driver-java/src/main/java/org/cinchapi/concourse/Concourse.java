@@ -4532,6 +4532,9 @@ public abstract class Concourse implements AutoCloseable {
             catch (org.cinchapi.concourse.thrift.ParseException e) {
                 throw new ParseException(e);
             }
+            catch (org.cinchapi.concourse.thrift.InvalidArgumentException e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
             catch (Exception e) {
                 throw Throwables.propagate(e);
             }
