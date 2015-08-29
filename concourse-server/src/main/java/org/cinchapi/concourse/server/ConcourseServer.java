@@ -94,12 +94,12 @@ import org.cinchapi.concourse.util.TSets;
 import org.cinchapi.concourse.util.Timestamps;
 import org.cinchapi.concourse.util.Version;
 import org.cinchapi.concourse.Constants;
-import org.cinchapi.concourse.DuplicateEntryException;
+import org.cinchapi.concourse.thrift.DuplicateEntryException;
 import org.cinchapi.concourse.Link;
-import org.cinchapi.concourse.ParseException;
+import org.cinchapi.concourse.thrift.ParseException;
 import org.cinchapi.concourse.Timestamp;
-import org.cinchapi.concourse.SecurityException;
-import org.cinchapi.concourse.TransactionException;
+import org.cinchapi.concourse.thrift.SecurityException;
+import org.cinchapi.concourse.thrift.TransactionException;
 import org.cinchapi.concourse.thrift.Type;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 

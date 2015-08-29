@@ -16,7 +16,7 @@
  */
 package org.cinchapi.concourse;
 
-import org.cinchapi.concourse.SecurityException;
+import org.cinchapi.concourse.thrift.SecurityException;
 import org.junit.Assert;
 import org.junit.Test;
 

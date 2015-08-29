@@ -42,6 +42,7 @@ import org.cinchapi.concourse.thrift.AccessToken;
 import org.cinchapi.concourse.thrift.ConcourseService;
 import org.cinchapi.concourse.thrift.Diff;
 import org.cinchapi.concourse.thrift.Operator;
+import org.cinchapi.concourse.thrift.SecurityException;
 import org.cinchapi.concourse.thrift.TObject;
 import org.cinchapi.concourse.thrift.TransactionToken;
 import org.cinchapi.concourse.time.Time;
@@ -1801,6 +1802,8 @@ public abstract class Concourse implements AutoCloseable {
      * </pre>
      * 
      * </p>
+     * 
+     * @throws TransactionException
      */
     public abstract void stage() throws TransactionException;
 
@@ -2705,7 +2708,8 @@ public abstract class Concourse implements AutoCloseable {
             }
             catch (SecurityException | TTransportException e) {
                 // Handle corner case where the client is existing because of
-                // (or after the occurrence of) a password change, which means it
+                // (or after the occurrence of) a password change, which means
+                // it
                 // can't perform a traditional logout. Its worth nothing that
                 // we're okay with this scenario because a password change will
                 // delete all previously issued tokens.
@@ -4518,6 +4522,15 @@ public abstract class Concourse implements AutoCloseable {
             catch (SecurityException e) {
                 authenticate();
                 return execute(callable);
+            }
+            catch (org.cinchapi.concourse.thrift.TransactionException e) {
+                throw new TransactionException(e);
+            }
+            catch (org.cinchapi.concourse.thrift.DuplicateEntryException e) {
+                throw new DuplicateEntryException(e);
+            }
+            catch (org.cinchapi.concourse.thrift.ParseException e) {
+                throw new ParseException(e);
             }
             catch (Exception e) {
                 throw Throwables.propagate(e);

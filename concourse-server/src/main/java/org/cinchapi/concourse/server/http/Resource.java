@@ -19,7 +19,7 @@ import org.cinchapi.concourse.server.GlobalState;
 import org.cinchapi.concourse.server.http.errors.HttpError;
 import org.cinchapi.concourse.thrift.AccessToken;
 import org.cinchapi.concourse.thrift.TransactionToken;
-import org.cinchapi.concourse.SecurityException;
+import org.cinchapi.concourse.thrift.SecurityException;
 import org.cinchapi.concourse.util.Logger;
 
 import spark.HaltException;

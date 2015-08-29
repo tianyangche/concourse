@@ -45,7 +45,7 @@ import jline.console.history.FileHistory;
 
 import org.apache.thrift.transport.TTransportException;
 import org.cinchapi.concourse.ParseException;
-import org.cinchapi.concourse.SecurityException;
+import org.cinchapi.concourse.thrift.SecurityException;
 import org.cinchapi.concourse.Tag;
 import org.cinchapi.concourse.Concourse;
 import org.cinchapi.concourse.Timestamp;
