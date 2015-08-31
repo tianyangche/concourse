@@ -42,8 +42,6 @@ import javax.management.ObjectName;
 import org.cinchapi.concourse.thrift.Diff;
 import org.apache.thrift.TException;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TThreadPoolServer;
-import org.apache.thrift.server.TThreadPoolServer.Args;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.cinchapi.concourse.annotate.Alias;
@@ -77,6 +75,9 @@ import org.cinchapi.concourse.server.storage.TransactionStateException;
 import org.cinchapi.concourse.shell.CommandLine;
 import org.cinchapi.concourse.thrift.AccessToken;
 import org.cinchapi.concourse.thrift.ConcourseService;
+import org.cinchapi.concourse.thrift.ConcourseThriftServer;
+import org.cinchapi.concourse.thrift.ConcourseThriftServer.Args;
+import org.cinchapi.concourse.thrift.InvalidArgumentException;
 import org.cinchapi.concourse.thrift.TCriteria;
 import org.cinchapi.concourse.thrift.TObject;
 import org.cinchapi.concourse.thrift.ConcourseService.Iface;
@@ -673,13 +674,13 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
         TServerSocket socket = new TServerSocket(port);
         ConcourseService.Processor<Iface> processor = new ConcourseService.Processor<Iface>(
                 this);
-        Args args = new TThreadPoolServer.Args(socket);
+        Args args = new ConcourseThriftServer.Args(socket);
         args.processor(processor);
         args.maxWorkerThreads(NUM_WORKER_THREADS);
         args.executorService(Executors
                 .newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
                         "Client Worker" + " %d").build()));
-        this.server = new TThreadPoolServer(args);
+        this.server = new ConcourseThriftServer(args);
         this.bufferStore = bufferStore;
         this.dbStore = dbStore;
         this.engines = Maps.newConcurrentMap();
@@ -700,7 +701,7 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
     @Atomic
     @AutoRetry
     public long addKeyValue(String key, TObject value, AccessToken creds,
-            TransactionToken transaction, String environment) throws TException {
+            TransactionToken transaction, String environment) throws TException, InvalidArgumentException {
         long record = 0;
         checkAccess(creds, transaction);
         try {
@@ -4489,6 +4490,33 @@ public class ConcourseServer implements ConcourseRuntime, ConcourseServerMXBean 
         public Object getValue() {
             return value;
         }
+
+    }
+
+    /**
+     * 
+     * 
+     * @author Jeff Nelson
+     */
+    public abstract class Process<T> {
+
+        AccessToken creds;
+        TransactionToken transaction;
+        String environment;
+
+        public Process(AccessToken creds, TransactionToken transaction,
+                String environment) {
+            this.creds = creds;
+            this.transaction = transaction;
+            this.environment = environment;
+        }
+
+        public final T start() throws SecurityException {
+            checkAccess(creds, transaction);
+            return execImpl();
+        }
+
+        protected abstract T execImpl();
 
     }
 
