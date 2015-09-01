@@ -43,10 +43,10 @@ exception DuplicateEntryException {
 }
 
 /**
- * Signals that a method has been given an illegal or inappropriate argument.
+ * Signals that a key contains illegal characters.
  */
-exception InvalidArgumentException {
-    1: string message
+exception IllegalKeyException {
+    1. string message
 }
 
 /**
