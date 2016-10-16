@@ -280,7 +280,11 @@ public class PluginManager {
      * to run the plugin code.
      */
     private String pluginLaunchClassTemplate;
-    
+
+    /**
+     * Collection which holds all currrently running plugins. It is stored as
+     * pid <space> plugin launch class name.
+     */
     private List<String> activePlugins = Lists.newArrayList();
 
     /**
@@ -487,6 +491,7 @@ public class PluginManager {
             app.destroy();
         }
         registry.clear();
+        activePlugins.clear();
         running = false;
     }
 
@@ -771,10 +776,15 @@ public class PluginManager {
         registry.put(id, RegistryData.APP_INSTANCE, app);
         registry.put(id, RegistryData.FROM_PLUGIN_RESPONSES,
                 Maps.<AccessToken, RemoteMethodResponse> newConcurrentMap());
-        Logger.info("HBD : {}",registry);
-        activePlugins.add(app.getPid()+" "+id);
+        Logger.info("HBD : {}", registry);
+        activePlugins.add(app.getPid() + " " + id);
     }
-    
+
+    /**
+     * Get all current running plugins.
+     * 
+     * @return a list of plugin names with pids.
+     */
     public List<String> getAllRunningPlugins() {
         return activePlugins;
     }
