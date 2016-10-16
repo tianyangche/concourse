@@ -106,6 +106,15 @@ public abstract class BaseConcourseServer
             throw new ManagementException(e.getMessage());
         }
     }
+    
+    @Override
+    @PluginRestricted
+    public final String listAllRunningPlugins()
+            throws TException {
+        return TCollections.toOrderedListString(
+                getPluginManager().getAllRunningPlugins());
+        
+    }
 
     @Override
     @PluginRestricted

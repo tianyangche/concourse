@@ -178,6 +178,13 @@ service ConcourseManagementService {
    */
   string listPluginBundles(
 	  1: shared.AccessToken creds);
+  
+  /**
+   * List all of the currently running plugins.
+   *
+   * @return a String containing a list of all the current running plugins
+   */
+  string listAllRunningPlugins();
 
   /**
    * Remove the user identified by {@code username}.
