@@ -115,8 +115,12 @@ public class ManagePluginsCli extends ManagementCli {
             }
             break;
         case PLUGINS_RUNNING:
-            Map<String, String> plugins = PluginManager.activePlugins;
-            plugins.forEach((k,v) -> System.out.println(v));
+            try {
+                System.out.println(client.listAllRunningPlugins());
+            }
+            catch (TException e) {
+                die(e.getMessage());
+            }
             break;
         case UNINSTALL_BUNDLE:
             break;
