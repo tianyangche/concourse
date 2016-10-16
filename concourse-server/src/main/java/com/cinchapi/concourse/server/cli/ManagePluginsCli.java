@@ -17,12 +17,15 @@ package com.cinchapi.concourse.server.cli;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.thrift.TException;
 
 import com.beust.jcommander.Parameter;
 import com.cinchapi.concourse.server.io.FileSystem;
 import com.cinchapi.concourse.server.management.ConcourseManagementService;
+import com.cinchapi.concourse.server.plugin.PluginManager;
 import com.google.common.base.Strings;
 
 /**
@@ -38,7 +41,7 @@ public class ManagePluginsCli extends ManagementCli {
      * @author Jeff Nelson
      */
     private static enum CodePath {
-        INSTALL, LIST_BUNDLES, UNINSTALL_BUNDLE, NONE;
+        INSTALL, LIST_BUNDLES, UNINSTALL_BUNDLE, PLUGINS_RUNNING, NONE;
 
         /**
          * Given a collection of {@code options}, figure out the correct
@@ -50,6 +53,9 @@ public class ManagePluginsCli extends ManagementCli {
         public static CodePath getCodePath(PluginOptions options) {
             if(options.listBundles) {
                 return LIST_BUNDLES;
+            }
+            if(options.pluginProcesses) {
+                return PLUGINS_RUNNING;
             }
             else if(!Strings.isNullOrEmpty(options.install)) {
                 return INSTALL;
@@ -108,6 +114,10 @@ public class ManagePluginsCli extends ManagementCli {
                                         + "installer", opts.install));
             }
             break;
+        case PLUGINS_RUNNING:
+            Map<String, String> plugins = PluginManager.activePlugins;
+            plugins.forEach((k,v) -> System.out.println(v));
+            break;
         case UNINSTALL_BUNDLE:
             break;
         case LIST_BUNDLES:
@@ -133,6 +143,9 @@ public class ManagePluginsCli extends ManagementCli {
 
         @Parameter(names = { "-l", "--list-bundles" }, description = "list all the available plugins")
         public boolean listBundles;
+        
+        @Parameter(names = { "--ps" }, description = "list all the current running plugin processes")
+        public boolean pluginProcesses;
     }
 
 }

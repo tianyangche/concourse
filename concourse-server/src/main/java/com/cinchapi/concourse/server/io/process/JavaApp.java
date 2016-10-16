@@ -36,6 +36,7 @@ import javax.tools.ToolProvider;
 
 import com.cinchapi.concourse.server.io.FileSystem;
 import com.cinchapi.concourse.util.Platform;
+import com.cinchapi.concourse.util.Processes;
 import com.cinchapi.concourse.util.TLists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -234,6 +235,15 @@ public class JavaApp extends Process {
                 throw new RuntimeException("Could not compile source");
             }
         }
+    }
+    
+    /**
+     * get the pid of the current process.
+     * 
+     * @return pid.
+     */
+    public String getPid() {
+       return Processes.getCurrentPid();
     }
 
     @Override

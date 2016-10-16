@@ -280,6 +280,8 @@ public class PluginManager {
      * to run the plugin code.
      */
     private String pluginLaunchClassTemplate;
+    
+    private List<String> activePlugins = Lists.newArrayList();
 
     /**
      * Construct a new instance.
@@ -769,6 +771,12 @@ public class PluginManager {
         registry.put(id, RegistryData.APP_INSTANCE, app);
         registry.put(id, RegistryData.FROM_PLUGIN_RESPONSES,
                 Maps.<AccessToken, RemoteMethodResponse> newConcurrentMap());
+        Logger.info("HBD : {}",registry);
+        activePlugins.add(app.getPid()+" "+id);
+    }
+    
+    public List<String> getAllRunningPlugins() {
+        return activePlugins;
     }
 
     /**
