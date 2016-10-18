@@ -732,11 +732,14 @@ public class PluginManager {
                     "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="
                             + config.getRemoteDebuggerPort());
         }
+        String appToken = BaseEncoding.base32Hex()
+                .encode(JavaApp.getNewJavaAppToken().array());
         options.add("-Xms" + heapSize + "M");
         options.add("-Xmx" + heapSize + "M");
         options.add("-D" + Plugin.PLUGIN_HOME_JVM_PROPERTY + "=" + pluginHome);
         options.add("-D" + Plugin.PLUGIN_SERVICE_TOKEN_JVM_PROPERTY + "="
                 + serviceToken);
+        options.add("-D" + JavaApp.APP_TOKEN_JVM_PROPERTY + "=" + appToken);
         String cp = StringUtils.join(classpath, JavaApp.CLASSPATH_SEPARATOR);
         JavaApp app = new JavaApp(cp, source, options);
         app.run();
@@ -776,7 +779,9 @@ public class PluginManager {
         registry.put(id, RegistryData.APP_INSTANCE, app);
         registry.put(id, RegistryData.FROM_PLUGIN_RESPONSES,
                 Maps.<AccessToken, RemoteMethodResponse> newConcurrentMap());
-        activePlugins.add(app.getPid() + " " + id);
+        String pluginPid = app.getPluginInfo(appToken);
+        if( pluginPid!= null)
+            activePlugins.add(pluginPid + " " + id);
     }
 
     /**

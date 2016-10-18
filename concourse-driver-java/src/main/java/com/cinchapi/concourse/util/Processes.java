@@ -16,6 +16,7 @@
 package com.cinchapi.concourse.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -46,8 +47,8 @@ public final class Processes {
         ProcessBuilder pb = new ProcessBuilder(commands);
         if(!Platform.isWindows()) {
             Map<String, String> env = pb.environment();
-            env.put("BASH_ENV", System.getProperty("user.home")
-                    + "/.bash_profile");
+            env.put("BASH_ENV",
+                    System.getProperty("user.home") + "/.bash_profile");
         }
         return pb;
     }
@@ -98,8 +99,8 @@ public final class Processes {
      */
     private static List<String> readStream(InputStream stream) {
         try {
-            BufferedReader out = new BufferedReader(new InputStreamReader(
-                    stream));
+            BufferedReader out = new BufferedReader(
+                    new InputStreamReader(stream));
             String line;
             List<String> output = Lists.newArrayList();
             while ((line = out.readLine()) != null) {
@@ -130,7 +131,7 @@ public final class Processes {
             throw Throwables.propagate(e);
         }
     }
-    
+
     /**
      * Return the pid of the current process.
      * 
@@ -139,7 +140,7 @@ public final class Processes {
     public static String getCurrentPid() {
         return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
     }
-    
+
     /**
      * Get the stderr for {@code process}.
      * 
@@ -152,4 +153,42 @@ public final class Processes {
 
     private Processes() {} /* noinit */
 
+    /**
+     * <p>
+     * Runs the process status command and gets the pid of the process that
+     * holds the input appToken.
+     * </p>
+     * Currently this functionality will be supported only by Linux,Mac and
+     * Solaris platform.
+     * 
+     * @param appToken
+     * @return pid of the plugin
+     */
+    public static String getPluginInfo(String appToken) {
+        Process process = null;
+        try {
+            if(Platform.isLinux() || Platform.isMacOsX()
+                    || Platform.isSolaris()) {
+                ProcessBuilder pb = getBuilderWithPipeSupport(
+                        "ps aux | grep " + appToken + " | grep -v \"grep "
+                                + appToken + "\" | awk '{print $2}' ");
+                process = pb.start();
+            }
+            else {
+                throw new UnsupportedOperationException(
+                        "Cannot get plugin information from the underlying platform");
+            }
+        }
+        catch (IOException e) {
+            Throwables.propagate(e);
+        }
+        if(process != null) {
+            waitForSuccessfulCompletion(process);
+            List<String> lines = readStream(process.getInputStream());
+            for (String line : lines) {
+                return line;
+            }
+        }
+        return null;
+    }
 }

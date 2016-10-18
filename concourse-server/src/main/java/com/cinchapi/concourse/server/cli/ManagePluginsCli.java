@@ -17,24 +17,28 @@ package com.cinchapi.concourse.server.cli;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.thrift.TException;
 
 import com.beust.jcommander.Parameter;
 import com.cinchapi.concourse.server.io.FileSystem;
 import com.cinchapi.concourse.server.management.ConcourseManagementService;
-import com.cinchapi.concourse.server.plugin.PluginManager;
+import com.cinchapi.concourse.util.PrettyLinkedTableMap;
 import com.google.common.base.Strings;
 
 /**
  * A management CLI to add/remove/upgrade/etc plugins.
  * 
  * @author Jeff Nelson
+ * @author Raghav Babu
  */
 public class ManagePluginsCli extends ManagementCli {
 
+    /**
+     * Console output table column header for plugin.
+     */
+    private static final String PLUGIN_HEADER = "Plugin";
+    
     /**
      * An enum that represents broad code paths for the CLIs operations.
      * 
@@ -107,8 +111,8 @@ public class ManagePluginsCli extends ManagementCli {
             }
             else {
                 throw new UnsupportedOperationException(
-                        com.cinchapi.concourse.util.Strings.format(
-                                "Cannot download plugin bundle '{}'. Please "
+                        com.cinchapi.concourse.util.Strings
+                                .format("Cannot download plugin bundle '{}'. Please "
                                         + "manually download the plugin and "
                                         + "provide its local path to the "
                                         + "installer", opts.install));
@@ -116,7 +120,14 @@ public class ManagePluginsCli extends ManagementCli {
             break;
         case PLUGINS_RUNNING:
             try {
-                System.out.println(client.listAllRunningPlugins());
+                PrettyLinkedTableMap<String, String, String> map = PrettyLinkedTableMap
+                        .newPrettyLinkedTableMap("Pid");
+                String[] results = client.listAllRunningPlugins().split("\n");
+                for (String res : results) {
+                    String[] values = res.split("\\s");
+                    map.put(values[1], PLUGIN_HEADER, values[2]);
+                }
+                System.out.println(map);
             }
             catch (TException e) {
                 die(e.getMessage());
@@ -139,16 +150,20 @@ public class ManagePluginsCli extends ManagementCli {
      */
     protected static class PluginOptions extends Options {
 
-        @Parameter(names = { "-i", "--install", "-install" }, description = "The name or path to a plugin bundle to install")
+        @Parameter(names = { "-i", "--install",
+                "-install" }, description = "The name or path to a plugin bundle to install")
         public String install;
 
-        @Parameter(names = { "-x", "--uninstall-bundle" }, description = "The name of the plugin bundle to uninstall")
+        @Parameter(names = { "-x",
+                "--uninstall-bundle" }, description = "The name of the plugin bundle to uninstall")
         public String uninstallBundle;
 
-        @Parameter(names = { "-l", "--list-bundles" }, description = "list all the available plugins")
+        @Parameter(names = { "-l",
+                "--list-bundles" }, description = "list all the available plugins")
         public boolean listBundles;
-        
-        @Parameter(names = { "--ps" }, description = "list all the current running plugin processes")
+
+        @Parameter(names = {
+                "--ps" }, description = "list all the current running plugin processes")
         public boolean pluginProcesses;
     }
 

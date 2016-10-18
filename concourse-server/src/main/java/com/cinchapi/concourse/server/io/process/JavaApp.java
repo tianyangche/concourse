@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,13 +36,17 @@ import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
 import com.cinchapi.concourse.server.io.FileSystem;
+import com.cinchapi.concourse.thrift.AccessToken;
+import com.cinchapi.concourse.util.ByteBuffers;
 import com.cinchapi.concourse.util.Platform;
 import com.cinchapi.concourse.util.Processes;
+import com.cinchapi.concourse.util.Random;
 import com.cinchapi.concourse.util.TLists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
 
 /**
@@ -58,6 +63,21 @@ public class JavaApp extends Process {
      */
     @VisibleForTesting
     protected static int PREMATURE_SHUTDOWN_CHECK_INTERVAL_IN_MILLIS = 3000;
+
+    /**
+     * A randomly chosen username for JavaApp. The randomly generated name is
+     * chosen so that it is impossible for it to conflict with an actual
+     * username, based on the rules that govern valid usernames (e.g. usernames
+     * cannot contain spaces)
+     */
+    private static final String APP_USERNAME = Random.getSimpleString() + " "
+            + Random.getSimpleString();
+
+    /**
+     * The name of the dynamic property that is passed to the plugin's JVM to
+     * distinguish the particular JavaApp from others.
+     */
+    public final static String APP_TOKEN_JVM_PROPERTY = "com.cinchapi.concourse.server.io.process.JavaApp.token";
 
     /**
      * Make sure that the {@code source} has all the necessary components and
@@ -183,6 +203,25 @@ public class JavaApp extends Process {
     }
 
     /**
+     * Return a new JavaApp token.
+     * 
+     * <p>
+     * A JavaApp token is a token that is not associated with an
+     * actual user, but is instead generated based on the
+     * {@link #APP_USERNAME}.
+     * </p>
+     * <p>
+     * Service tokens do not expire!
+     * </p>
+     * 
+     * @return the new service token
+     */
+    public static ByteBuffer getNewJavaAppToken() {
+        ByteBuffer bytes = ByteBuffers.fromString(APP_USERNAME);
+        return bytes;
+    }
+
+    /**
      * Construct a new instance.
      *
      * @param classpath
@@ -191,7 +230,7 @@ public class JavaApp extends Process {
      */
     public JavaApp(String classpath, String source, ArrayList<String> options) {
         this(classpath, source,
-            (String[]) options.toArray(new String[options.size()]));
+                (String[]) options.toArray(new String[options.size()]));
     }
 
     /**
@@ -211,18 +250,18 @@ public class JavaApp extends Process {
                     cpList.add(new File(part));
                 }
                 try {
-                    fileManager
-                            .setLocation(StandardLocation.CLASS_PATH, cpList);
+                    fileManager.setLocation(StandardLocation.CLASS_PATH,
+                            cpList);
                 }
                 catch (IOException e) {
                     throw Throwables.propagate(e);
                 }
                 Iterable<? extends JavaFileObject> compilationUnits = fileManager
-                        .getJavaFileObjectsFromStrings(Arrays
-                                .asList(sourceFile));
-                CompilationTask task = compiler.getTask(null, fileManager,
-                        null, Lists.newArrayList("-classpath", classpath),
-                        null, compilationUnits);
+                        .getJavaFileObjectsFromStrings(
+                                Arrays.asList(sourceFile));
+                CompilationTask task = compiler.getTask(null, fileManager, null,
+                        Lists.newArrayList("-classpath", classpath), null,
+                        compilationUnits);
                 exit = task.call() ? 0 : 1;
             }
             else {
@@ -236,14 +275,14 @@ public class JavaApp extends Process {
             }
         }
     }
-    
+
     /**
-     * Get the pid of the current process.
+     * Get the pid of the {@link Plugin} started by this JavaApp.
      * 
      * @return pid.
      */
-    public String getPid() {
-       return Processes.getCurrentPid();
+    public String getPluginInfo(String appToken) {
+        return Processes.getPluginInfo(appToken);
     }
 
     @Override
@@ -314,19 +353,18 @@ public class JavaApp extends Process {
      */
     public void onPrematureShutdown(final PrematureShutdownHandler handler) {
         watcher = Executors.newSingleThreadScheduledExecutor();
-        watcher.scheduleAtFixedRate(
-                new Runnable() {
+        watcher.scheduleAtFixedRate(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        if(!isRunning()) {
-                            handler.run(process.getInputStream(),
-                                    process.getErrorStream());
-                            destroy();
-                        }
-                    }
+            @Override
+            public void run() {
+                if(!isRunning()) {
+                    handler.run(process.getInputStream(),
+                            process.getErrorStream());
+                    destroy();
+                }
+            }
 
-                }, PREMATURE_SHUTDOWN_CHECK_INTERVAL_IN_MILLIS,
+        }, PREMATURE_SHUTDOWN_CHECK_INTERVAL_IN_MILLIS,
                 PREMATURE_SHUTDOWN_CHECK_INTERVAL_IN_MILLIS,
                 TimeUnit.MILLISECONDS);
     }
@@ -340,14 +378,14 @@ public class JavaApp extends Process {
      */
     public void run() {
         compile();
-        List<String> args = Lists.newArrayList(javaBinary, "-cp", classpath
-                + ":.");
+        List<String> args = Lists.newArrayList(javaBinary, "-cp",
+                classpath + ":.");
         for (String option : options) {
             args.add(option);
         }
         args.add(mainClass);
-        ProcessBuilder builder = new ProcessBuilder(TLists.toArrayCasted(args,
-                String.class));
+        ProcessBuilder builder = new ProcessBuilder(
+                TLists.toArrayCasted(args, String.class));
         builder.directory(new File(workspace));
         try {
             process = builder.start();
