@@ -779,7 +779,7 @@ public class PluginManager {
         registry.put(id, RegistryData.APP_INSTANCE, app);
         registry.put(id, RegistryData.FROM_PLUGIN_RESPONSES,
                 Maps.<AccessToken, RemoteMethodResponse> newConcurrentMap());
-        String pluginPid = app.getPluginInfo(appToken);
+        String pluginPid = app.getPid(appToken);
         if( pluginPid!= null)
             activePlugins.add(pluginPid + " " + id);
     }
